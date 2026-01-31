@@ -1,4 +1,4 @@
-# SmartBoard ESP8266 🔌📱
+# SmartBoard ESP8266 
 
 A cloud-connected **Smart Extension Board** built using **ESP8266 (NodeMCU)** and **Firebase Realtime Database**, controlled via an Android application.
 
@@ -8,6 +8,11 @@ A cloud-connected **Smart Extension Board** built using **ESP8266 (NodeMCU)** an
 - Secure authentication
 - Works from anywhere (no local network dependency)
 - Scalable to N relays
+
+### Timer-Based Automation
+Users can schedule appliances to turn ON at a specific time
+and automatically turn OFF after a defined duration using
+cloud-based scheduling with Firebase RTDB and NTP time sync.
 
 ## Architecture
 Android App → Firebase RTDB → ESP8266 → Relay Module(connected to extension board switches) → Appliances
@@ -39,10 +44,39 @@ Android App → Firebase RTDB → ESP8266 → Relay Module(connected to extensio
 {
   "smartboard": {
      "devices":{
-	  "appliance1": false,
-	  "appliance2": false,
-	  "appliance3": false,
-          "appliance4": false
+	  "appliance1": {
+      "state": 0,
+      "timer": {
+        "enabled": true,
+        "start": "18:30",
+        "duration_min": 30
+      },
+	  "appliance2": {
+      "state": 0,
+      "timer": {
+        "enabled": true,
+        "start": "18:30",
+        "duration_min": 30
+      },
+	  "appliance3": {
+      "state": 0,
+      "timer": {
+        "enabled": true,
+        "start": "18:30",
+        "duration_min": 30
+      },
+ 	  "appliance4": {
+      "state": 0,
+      "timer": {
+        "enabled": true,
+        "start": "18:30",
+        "duration_min": 30
+      }
 	}
   }
 }
+
+## Safety Disclaimer
+This project involves using ralay module with AC loads 
+,hence user must ensure proper electrical isolation and
+safety measures.
