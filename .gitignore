@@ -1,0 +1,9 @@
+# A .gitignore file is a plain text file that tells Git which files or folders to exclude from being tracked
+
+config.h
+*.log
+*.tmp
+.DS_Store
+.vscode/
+.idea/
+credentials.*
