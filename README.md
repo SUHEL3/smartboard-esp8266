@@ -29,7 +29,10 @@ Android App → Firebase RTDB → ESP8266 → Relay Module(connected to extensio
 ├── smartboard.ino
 └── config.h (ignored)
 
-
+## Safety Disclaimer
+This project involves using ralay module with AC loads 
+,hence user must ensure proper electrical isolation and
+safety measures.
 
 ## Setup Instruction
 
@@ -76,7 +79,3 @@ Android App → Firebase RTDB → ESP8266 → Relay Module(connected to extensio
   }
 }
 
-## Safety Disclaimer
-This project involves using ralay module with AC loads 
-,hence user must ensure proper electrical isolation and
-safety measures.
