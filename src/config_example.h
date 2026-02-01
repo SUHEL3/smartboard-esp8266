@@ -1,3 +1,8 @@
+#pragma once
+
+// ================= Wi-Fi Configuration =================
+// Rename this file to config.h and fill in your details
+
 #define WIFI_SSID "YOUR_WIFI"
 #define WIFI_PASSWORD "YOUR_PASSWORD"
 
