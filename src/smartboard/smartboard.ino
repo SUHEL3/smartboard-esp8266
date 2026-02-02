@@ -6,9 +6,7 @@
 #include <ESP8266WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include "config.h"
-extern "c"{
-  #include "time.h"
-}
+#include <time.h>
 
 // Relay configuration
 // Defining pins
@@ -42,6 +40,14 @@ const char* startpath[4] = {
   "smartboard/devices/appliance2/timer/start",
   "smartboard/devices/appliance3/timer/start",
   "smartboard/devices/appliance4/timer/start"
+};
+
+// Timer duration path
+const char* durationpath[4] = {
+  "smartboard/devices/appliance1/timer/duration_min",
+  "smartboard/devices/appliance2/timer/duration_min",
+  "smartboard/devices/appliance3/timer/duration_min",
+  "smartboard/devices/appliance4/timer/duration_min"
 };
 
 // corresponding pins 
@@ -136,6 +142,20 @@ void loop() {
           // Fetch timer value
           if(Firebase.RTDB.getString(&fbdo, startpath[i])){
             String startTime = fbdo.stringData();
+            if(Firebase.RTDB.getInt(&fbdo, durationpath[i])){
+                int durationMin = fbdo.intData();
+                int currentMin = timeinfo.tm_hour * 60 + timeinfo.tm_min;
+
+                int startHour = startTime.substring(0,2).toInt();
+                int startMin = startTime.substring(3,5).toInt();
+                int startTotalMin = startHour * 60 + startMin;
+
+                if(currentMin >= startTotalMin + durationMin){
+                    digitalWrite(pins[i], HIGH);
+                    Firebase.RTDB.setInt(&fbdo, appliancepath[i], 0);
+                }
+          } 
+
             if(String(timeStr) == startTime){
               digitalWrite(pins[i], LOW);
               Firebase.RTDB.setInt(&fbdo, appliancepath[i] , 1);
@@ -150,7 +170,7 @@ void loop() {
       Serial.println(fbdo.errorReason());
     }
   }
-    delay(1000);// this avoid excessive firbase reads
+    delay(2000);// this avoid excessive firbase reads
 }
 
 // Important Note :
