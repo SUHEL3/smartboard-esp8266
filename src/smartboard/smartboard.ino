@@ -1,32 +1,45 @@
 // Author: Suhel Mujawar
 /*Note: In NodeMCU HIGH -> 0 and LOW -> 1*/
+// Requires "Firebase ESP Client" by Mobizt
+// Do NOT use older Firebase ESP32/ESP8266 libraries
 
 #include <ESP8266WiFi.h>
-#include <Firebase.h>
+#include <Firebase_ESP_Client.h>
 #include "config.h"
 
 // Relay configuration
 // Defining pins
 #define RELAY1 D1
 #define RELAY2 D2
+#define RELAY3 D3
+#define RELAY4 D4
 
 // Firebase Objects
 FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
 
+// Firebase RTDB paths array
+const char* path[4] = {
+  "smartboard/devices/appliance1/state",
+  "smartboard/devices/appliance2/state",
+  "smartboard/devices/appliance3/state",
+  "smartboard/devices/appliance4/state"
+};
+// corresponding pins 
+const uint8_t pins[4] = {
+  RELAY1,RELAY2,RELAY3,RELAY4
+};
 
 void setup() {
   // put your setup code here, to run once:
-  // Configuring relay pins
-  pinMode(RELAY1, OUTPUT);
-  pinMode(RELAY2, OUTPUT);
-
   pinMode(LED_BUILTIN, OUTPUT);
   
-  // Keeping relay OFF at startup
-  digitalWrite(RELAY1, HIGH);
-  digitalWrite(RELAY2, HIGH);
+  // Configuring relay pins and keeping relay OFF at startup
+  for(int i = 0; i < 4; i++){
+    pinMode(pins[i], OUTPUT);
+    digitalWrite(pins[i], HIGH);
+  }
 
   Serial.begin(115200);
 
@@ -70,21 +83,21 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(Firebase.RTDB.getInt(&fbdo, "smartboard/devices/appliance1/state")){
+  for(int i = 0; i < 4; i++){
+  if(Firebase.RTDB.getInt(&fbdo, path[i])){
     int state = fbdo.intData();
     if(state == 1){
-      digitalWrite(RELAY1, LOW);
+      digitalWrite(pins[i], LOW);
     }
     else{
-      digitalWrite(RELAY1, LOW);  
+      digitalWrite(pins[i], HIGH);  
     }
-
+  }
     else{
       Serial.println(fbdo.errorReason());
     }
-
-    delay(350);// this avoid excessive firbase reads
   }
+    delay(350);// this avoid excessive firbase reads
 }
 
 // Important Note :
