@@ -6,6 +6,9 @@
 #include <ESP8266WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include "config.h"
+extern "c"{
+  #include "time.h"
+}
 
 // Relay configuration
 // Defining pins
@@ -20,16 +23,35 @@ FirebaseAuth auth;
 FirebaseConfig config;
 
 // Firebase RTDB paths array
-const char* path[4] = {
+const char* appliancepath[4] = {
   "smartboard/devices/appliance1/state",
   "smartboard/devices/appliance2/state",
   "smartboard/devices/appliance3/state",
   "smartboard/devices/appliance4/state"
 };
+// Timer enable path
+const char* timerpath[4] = {
+  "smartboard/devices/appliance1/timer/enabled",
+  "smartboard/devices/appliance2/timer/enabled",
+  "smartboard/devices/appliance3/timer/enabled",
+  "smartboard/devices/appliance4/timer/enabled"
+};
+// Timer start time path
+const char* startpath[4] = {
+  "smartboard/devices/appliance1/timer/start",
+  "smartboard/devices/appliance2/timer/start",
+  "smartboard/devices/appliance3/timer/start",
+  "smartboard/devices/appliance4/timer/start"
+};
+
 // corresponding pins 
 const uint8_t pins[4] = {
   RELAY1,RELAY2,RELAY3,RELAY4
 };
+
+const char* ntpServer = "pool.ntp.org";
+const long gmtOffset_sec = 19800; // IST +5:30
+const int daylightOffset_sec = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -79,12 +101,15 @@ void setup() {
 
   Firebase.reconnectWiFi(true);
   Serial.println("Firebase connected.");
+
+   // Configure NTP
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   for(int i = 0; i < 4; i++){
-  if(Firebase.RTDB.getInt(&fbdo, path[i])){
+  if(Firebase.RTDB.getInt(&fbdo, appliancepath[i])){
     int state = fbdo.intData();
     if(state == 1){
       digitalWrite(pins[i], LOW);
@@ -92,12 +117,40 @@ void loop() {
     else{
       digitalWrite(pins[i], HIGH);  
     }
+    if(Firebase.RTDB.getBool(&fbdo, timerpath[i])){
+      bool enabled = fbdo.boolData();
+      if(enabled){
+        // Calculate current time 
+          struct tm timeinfo;
+
+          if (!getLocalTime(&timeinfo)) {
+              Serial.println("Failed to obtain time");
+              delay(1000);
+              return;
+            }
+
+
+          char timeStr[6];
+          sprintf(timeStr, "%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min);
+          Serial.println(timeStr);
+          // Fetch timer value
+          if(Firebase.RTDB.getString(&fbdo, startpath[i])){
+            String startTime = fbdo.stringData();
+            if(String(timeStr) == startTime){
+              digitalWrite(pins[i], LOW);
+              Firebase.RTDB.setInt(&fbdo, appliancepath[i] , 1);
+            }
+          }else{
+            Serial.println(fbdo.errorReason());
+          }
+      }
+    }
   }
     else{
       Serial.println(fbdo.errorReason());
     }
   }
-    delay(350);// this avoid excessive firbase reads
+    delay(1000);// this avoid excessive firbase reads
 }
 
 // Important Note :
