@@ -56,7 +56,7 @@ const uint8_t pins[4] = {
 };
 
 const char* ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 19800; // IST +5:30
+const long gmtOffset_sec = 19800; 
 const int daylightOffset_sec = 0;
 
 void setup() {
@@ -115,9 +115,9 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   for(int i = 0; i < 4; i++){
-  if(Firebase.RTDB.getInt(&fbdo, appliancepath[i])){
-    int state = fbdo.intData();
-    if(state == 1){
+  if(Firebase.RTDB.getBool(&fbdo, appliancepath[i])){
+    bool state = fbdo.boolData();
+    if(state){
       digitalWrite(pins[i], LOW);
     }
     else{
