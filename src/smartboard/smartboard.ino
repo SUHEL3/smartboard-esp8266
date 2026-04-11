@@ -152,13 +152,13 @@ void loop() {
 
                 if(currentMin >= startTotalMin + durationMin){
                     digitalWrite(pins[i], HIGH);
-                    Firebase.RTDB.setInt(&fbdo, appliancepath[i], 0);
+                    Firebase.RTDB.setBool(&fbdo, appliancepath[i], false);
                 }
           } 
 
             if(String(timeStr) == startTime){
               digitalWrite(pins[i], LOW);
-              Firebase.RTDB.setInt(&fbdo, appliancepath[i] , 1);
+              Firebase.RTDB.setBool(&fbdo, appliancepath[i] , true);
             }
           }else{
             Serial.println(fbdo.errorReason());
@@ -170,7 +170,7 @@ void loop() {
       Serial.println(fbdo.errorReason());
     }
   }
-    delay(2000);// this avoid excessive firbase reads
+    delay(500);// this avoid excessive firbase reads
 }
 
 // Important Note :
